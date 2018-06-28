@@ -1,6 +1,6 @@
 import os
 import shutil
-
+import filecmp
 
 def scan_file():
     files = os.listdir()
@@ -20,10 +20,16 @@ def delete(f):
     os.remove(f)
 
 
-while True:
-    f = scan_file()
-    if f:
-        unzip_file(f)
-        delete(f)
+# while True:
+#     f = scan_file()
+#     if f:
+#         unzip_file(f)
+#         delete(f)
 
+
+# 比较两个文件是否一致
+path1 = "./ad_background-568h@2x.png"
+path2 = "./ad_background-568h@2x2.png"
+result = filecmp.cmp(path1, path2)
+print(result)
 
