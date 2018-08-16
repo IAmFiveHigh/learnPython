@@ -2,8 +2,8 @@ from selenium import webdriver
 import time
 import json
 
-url = 'https://item.jd.com/5463278.html'
-name = "索尼（SONY）WI-1000X Hi-Res颈挂式 入耳式 无线蓝牙耳机"
+sku = '5089253'
+url = f'https://item.jd.com/{sku}.html'
 
 
 def start_chrome():
@@ -34,11 +34,13 @@ def find_status():
     return el
 
 
-def find_kv(h3):
-    pass
+def find_name():
+    btn_sel = 'div.sku-name'
+    el = driver.find_element_by_css_selector(btn_sel)
+    return el.text
+
 
 item = find_status()
-dict1 = {'name': '耳机'}
 d = {}
 for i in item:
 
@@ -57,9 +59,9 @@ for i in item:
 
     d[h3.text] = array
 
-data = json.dumps(d)
+data = json.dumps(d).encode('utf-8').decode('unicode_escape')
 
-
-fileObject = open(f'{name}.json', 'w')
+name = find_name()
+fileObject = open(f'{name}.txt', 'w')
 fileObject.write(data)
 fileObject.close()
