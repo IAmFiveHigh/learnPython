@@ -54,6 +54,8 @@ for sku in skus:
             if content == '此用户未填写评价内容':
                 continue
 
+            # 评价星级
+            score = j['score']
             # 评论人昵称
             name = j['nickname']
             # 评论时间
@@ -64,7 +66,7 @@ for sku in skus:
             if t1 < app_up_time:
                 continue
 
-            print(name, creation_time, content)
+            print(score, name, creation_time, content)
 
             # image
             if 'images' in j.keys():
@@ -77,7 +79,7 @@ for sku in skus:
                     img_url = 'http:' + img_url
                     images_array.append(img_url)
                 images_url_array = ';'.join(images_array)
-                product_comment_array.append([name, content, creation_time, images_url_array])
+                product_comment_array.append([score, name, content, creation_time, images_url_array])
 
 
     product_np = np.array(product_comment_array)
