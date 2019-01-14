@@ -7,19 +7,29 @@ import numpy as np
 import time
 import json
 
-
-# //img30.360buyimg.com/shaidan/s616x405_jfs/t1/731/3/13167/676032/5bd49c37Eb9b334f5/9cfd67bc17ce8eb9.jpg
-# //img30.360buyimg.com/n0/s48x48_jfs/t1/731/3/13167/676032/5bd49c37Eb9b334f5/9cfd67bc17ce8eb9.jpg
-
-small_comment_image_url = 'img30.360buyimg.com/n0/s48x48_jfs/t26500/343/1741452158/221453/329361d1/5becbae5Nb904e1b4.jpg'
-big_comment_image_url = 'img30.360buyimg.com/shaidan/s616x405_jfs/t26500/343/1741452158/221453/329361d1/5becbae5Nb904e1b4.jpg'
+# small_comment_image_url = 'img30.360buyimg.com/n0/s48x48_jfs/t26500/343/1741452158/221453/329361d1/5becbae5Nb904e1b4.jpg'
+# big_comment_image_url = 'img30.360buyimg.com/shaidan/s616x405_jfs/t26500/343/1741452158/221453/329361d1/5becbae5Nb904e1b4.jpg'
 
 # app上线时间
 app_up_time = int(time.mktime(time.strptime('2018-12-15 00:00:00', '%Y-%m-%d %H:%M:%S')))
 
+# 上传图片地址
+up_load_url = 'http://xx.xx.xxx.xx/xxxxxx/fileupload'
+up_header = {"content-type":"multipart/form-data"}
+
+kv = {'user-agent':'mozilla/5.0'}
+
 skus = [
     '100001165254',
-    '33743197985'
+    '33743197985',
+    '100001860767',
+    '100000177748',
+    '1892019',
+    '100000206154',
+    '4325427',
+    '6805332',
+    '7629588',
+    '7842695'
     ]
 
 
@@ -30,6 +40,21 @@ def exchange_comment(comment_item):
     comment_item = re.sub('买', '租', comment_item)
     comment_item = re.sub('\n', '', comment_item)
     return comment_item
+
+
+def upload_image(images_array):
+    if len(images_array) == 0:
+        return ''
+    data = {}
+    for i in images_array:
+        time.sleep(0.1)
+        r = requests.get(i, headers=kv)
+        img_name = re.search('([a-zA-Z0-9]+\.jpg)', i).group()
+        data[img_name] = r.content
+
+    r = requests.post(up_load_url, files=data)
+    response = json.loads(r.text)
+    return ";".join(response['url'])
 
 
 for sku in skus:
@@ -56,6 +81,9 @@ for sku in skus:
 
             # 评价星级
             score = j['score']
+            if score < 5:
+                continue
+
             # 评论人昵称
             name = j['nickname']
             # 评论时间
@@ -78,8 +106,7 @@ for sku in skus:
                     img_url = re.sub('n0/s[0-9]{2,3}x[0-9]{2,3}_jfs', 'shaidan/s616x405_jfs', img_url)
                     img_url = 'http:' + img_url
                     images_array.append(img_url)
-                images_url_array = ';'.join(images_array)
-                product_comment_array.append([score, name, content, creation_time, images_url_array])
+                product_comment_array.append([score, name, content, creation_time, upload_image(images_array)])
 
 
     product_np = np.array(product_comment_array)
