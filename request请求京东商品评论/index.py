@@ -14,22 +14,19 @@ import json
 app_up_time = int(time.mktime(time.strptime('2018-12-15 00:00:00', '%Y-%m-%d %H:%M:%S')))
 
 # 上传图片地址
-up_load_url = 'http://xx.xx.xxx.xx/xxxxxx/fileupload'
+up_load_url = 'http://xx.xx.xxx.xx/xxxxx/fileupload'
 up_header = {"content-type":"multipart/form-data"}
 
 kv = {'user-agent':'mozilla/5.0'}
 
 skus = [
-    '100001165254',
-    '33743197985',
-    '100001860767',
-    '100000177748',
-    '1892019',
-    '100000206154',
-    '4325427',
-    '6805332',
-    '7629588',
-    '7842695'
+    '100000400012',
+    '7764819',
+    '2142745',
+    '7119998',
+    '6735790',
+    '8656283',
+    '4445599',
     ]
 
 
@@ -39,6 +36,8 @@ def exchange_comment(comment_item):
     comment_item = re.sub('自营', '', comment_item)
     comment_item = re.sub('买', '租', comment_item)
     comment_item = re.sub('\n', '', comment_item)
+    comment_item = re.sub('@', '', comment_item)
+    comment_item = re.sub('#', '', comment_item)
     return comment_item
 
 
@@ -47,9 +46,16 @@ def upload_image(images_array):
         return ''
     data = {}
     for i in images_array:
-        time.sleep(0.1)
-        r = requests.get(i, headers=kv)
+        print(i)
+        time.sleep(0.2)
+        try:
+            r = requests.get(i, headers=kv)
+        except Exception as e:
+            print(e)
+            continue
+
         img_name = re.search('([a-zA-Z0-9]+\.jpg)', i).group()
+        print(f'{img_name} download success')
         data[img_name] = r.content
 
     r = requests.post(up_load_url, files=data)
@@ -58,10 +64,11 @@ def upload_image(images_array):
 
 
 for sku in skus:
+    time.sleep(1)
     product_name = ''
     product_comment_array = []
 
-    for i in range(10):
+    for i in range(5):
         time.sleep(1)
         comment_url = f'http://sclub.jd.com/comment/productPageComments.action?callback=fetchJSON_comment98vv0&productId={sku}&score=0&sortType=5&page={i}&pageSize=10&isShadowSku={sku}&rid=0&fold=1'
         r = requests.get(comment_url)
@@ -94,8 +101,6 @@ for sku in skus:
             if t1 < app_up_time:
                 continue
 
-            print(score, name, creation_time, content)
-
             # image
             if 'images' in j.keys():
 
@@ -107,7 +112,7 @@ for sku in skus:
                     img_url = 'http:' + img_url
                     images_array.append(img_url)
                 product_comment_array.append([score, name, content, creation_time, upload_image(images_array)])
-
+            print(score, name, creation_time, content)
 
     product_np = np.array(product_comment_array)
     np.savetxt(f'{product_name}.csv', product_np, fmt='%s', delimiter=',')
